@@ -1,0 +1,261 @@
+function Cover(Enemy)
+    for i, v in pairs(Enemy:GetChildren()) do
+        if v:IsA("BasePart") and game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+            local math1 = math.random(1, i)
+            local math2 = math.random(1, i)
+            local math3 = math.random(1, i)
+            local math4 = math.random(1, i)
+            if i == math1 or i == math2 or i == math3 or i == math4 then
+                game.Players.LocalPlayer.Character:SetPrimaryPartCFrame(v.CFrame * CFrame.new(0, 3, 0))
+                wait(0.2)
+            end
+        end
+    end
+end
+
+function Sell(button)
+    for i, v in pairs(getconnections(button.MouseButton1Click)) do
+        v:Fire()
+    end
+end
+
+local SellAmount
+
+local AreaTab = {}
+local Selected
+getgenv().Reb = false
+getgenv().Food = false
+getgenv().Area = false
+getgenv().Sell = false
+getgenv().BuyEgg = false
+
+function Farm()
+    spawn(
+        function()
+            while getgenv().Food == true do
+                wait()
+                for i, v in pairs(game:GetService("Workspace")["Client_Services"].Areas.Foods:GetChildren()) do
+                    if v.Name == Selected then
+                        Cover(v)
+                        wait(1)
+                    end
+                end
+            end
+        end
+    )
+end
+function AreaBuy()
+    spawn(
+        function()
+            while getgenv().Area == true do
+                wait(20)
+                local Area = game:GetService("Workspace")["Client_Services"].Areas.Portals:GetChildren()
+                for i, v in pairs(Area) do
+                    if v:IsA("MeshPart") then
+                        game:GetService("ReplicatedStorage").Game_Service.Remotes_Event.Buy_Area:FireServer(v.Name)
+                        if game:GetService("CoreGui").PurchasePromptApp.Enabled == true then
+                            game:GetService("CoreGui").PurchasePromptApp.Enabled = false
+                        end
+                    end
+                end
+            end
+        end
+    )
+end
+
+function AutoSell()
+    spawn(
+        function()
+            while getgenv().Sell == true and SellAmount > 0 do
+                wait(1)
+                local PlrFood = game:GetService("Players").LocalPlayer.leaderstats.Food.Value
+                if tonumber(PlrFood) >= SellAmount then
+                    Sell(game:GetService("Players").LocalPlayer.PlayerGui.UI["Right_Buttons_Frame"].Sell.Button)
+                end
+            end
+        end
+    )
+end
+local EggTab = {}
+local SelectingEgg
+function BuyEgg()
+    spawn(
+        function()
+            while getgenv().BuyEgg == true do
+                wait()
+                local EggFrame = game:GetService("Players").LocalPlayer.PlayerGui["Egg_Frames"]:GetChildren()
+                for i = 1, #EggFrame do
+                    local Eggs = EggFrame[i]
+                    if Eggs.Name == SelectingEgg then
+                        game:GetService("ReplicatedStorage").Game_Service.Remotes_Event.Buy_Pet:FireServer("E", Eggs)
+                    end
+                end
+            end
+        end
+    )
+end
+
+function AutoReb()
+    spawn(
+        function()
+            while getgenv().Reb == true do
+                wait()
+                local PlayerMoney = game:GetService("Players").LocalPlayer.leaderstats.Coins.Value
+                local Rebirth =
+                    game:GetService("Players").LocalPlayer.PlayerGui.UI["Center_UI_Frame"].Rebirths:GetChildren()
+                for i = 1, #Rebirth do
+                    local Cust = Rebirth[i]
+                    if Cust.Name == "Custo" then
+                        local Cost = Cust.Text:split("(")[2]:split(" ")[1]
+                        if Cost:match("K") then
+                            local RoverCost = Cost:split("K")
+                            local RebirthCost = tonumber(math.floor(RoverCost[1]) * 1000)
+                            if PlayerMoney >= RebirthCost then
+                                print(RebirthCost)
+                                game:GetService("ReplicatedStorage").Game_Service.Remotes_Event.Rebirth:FireServer()
+                            elseif Cost:match("M") then
+                                local RoverCost1 = Cost:split("M")
+                                local RebirthCost1 = tonumber(math.floor(RoverCost1[1]) * 100000)
+                                if PlayerMoney >= RebirthCost1 then
+                                    game:GetService("ReplicatedStorage").Game_Service.Remotes_Event.Rebirth:FireServer()
+                                elseif Cost:match("B") then
+                                    local RoverCost2 = Cost:split("B")
+                                    local RebirthCost2 = tonumber(match.floor(RebirthCost2[1]) * 100000000)
+                                    if PlayerMoney >= RebirthCost2 then
+                                        game:GetService("ReplicatedStorage").Game_Service.Remotes_Event.Rebirth:FireServer(
+
+                                        )
+                                    end
+                                end
+                            end
+                        end
+                    end
+                end
+            end
+        end
+    )
+end
+
+local Areas = game:GetService("Workspace")["Client_Services"].Areas.Foods:GetChildren()
+local EggFold = game:GetService("Players").LocalPlayer.PlayerGui["Egg_Frames"]:GetChildren()
+for i = 1, #Areas do
+    local AddArea = Areas[i]
+    table.insert(AreaTab, AddArea.Name)
+end
+
+for i = 1, #EggFold do
+    local AddEgg = EggFold[i]
+    table.insert(EggTab, AddEgg.Name)
+end
+
+local library = loadstring(game:HttpGet(("https://raw.githubusercontent.com/AikaV3rm/UiLib/master/Lib.lua")))()
+
+local w = library:CreateWindow("Food Magnet Simulator") -- Creates the window
+
+local b = w:CreateFolder("Farms")
+b:Toggle(
+    "Auto Food",
+    function(bool)
+        getgenv().Food = bool
+        if bool then
+            Farm()
+        end
+    end
+)
+b:Dropdown(
+    "Select Area",
+    AreaTab,
+    true,
+    function(bool)
+        Selected = bool
+    end
+)
+
+b:Toggle(
+    "Auto Sell",
+    function(sell)
+        getgenv().Sell = sell
+        if sell then
+            AutoSell()
+        end
+    end
+)
+
+b:Box(
+    "Max Sell Amount",
+    "number",
+    function(text)
+        SellAmount = tonumber(text)
+    end
+)
+local b2 = w:CreateFolder("AutoBuy/Get")
+b2:Toggle(
+    "Auto Buy Egg",
+    function(stat)
+        getgenv().BuyEgg = stat
+        if stat then
+            BuyEgg()
+        end
+    end
+)
+
+b2:Dropdown(
+    "Select Egg",
+    EggTab,
+    true,
+    function(Select)
+        SelectingEgg = Select
+    end
+)
+
+b2:Toggle(
+    "Auto Buy Area",
+    function(statu)
+        getgenv().Area = statu
+        if statu then
+            AreaBuy()
+        end
+    end
+)
+b2:Toggle(
+    "Auto Rebirth",
+    function(stat)
+        getgenv().Reb = stat
+        if stat then
+            AutoReb()
+        end
+    end
+)
+b2:Slider(
+    "WalkSpeed",
+    {
+        min = 10,
+        max = 200,
+        precise = true
+    },
+    function(value)
+        game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = value
+    end
+)
+
+b2:Slider(
+    "JumpPower",
+    {
+        min = 10,
+        max = 200,
+        precise = true
+    },
+    function(value)
+        game.Players.LocalPlayer.Character.Humanoid.JumpPower = value
+    end
+)
+
+b2:Label(
+    "Made By:efeeee#8151",
+    {
+        TextSize = 13, -- Self Explaining
+        TextColor = Color3.fromRGB(255, 255, 255), -- Self Explaining
+        BgColor = Color3.fromRGB(35, 35, 35) -- Self Explaining
+    }
+)
+b2:DestroyGui()
