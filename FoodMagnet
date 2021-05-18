@@ -140,41 +140,59 @@ end
 
 
 
-function AutoReb()
-    spawn(function()
-        while getgenv().Reb == true do 
-            wait()
+    
+local AutoReb = (function()
     local PlayerMoney = game:GetService("Players").LocalPlayer.leaderstats.Coins.Value
     local Rebirth = game:GetService("Players").LocalPlayer.PlayerGui.UI["Center_UI_Frame"].Rebirths:GetChildren()
+    local RebirthCost
     for i = 1,#Rebirth do 
         local Cust = Rebirth[i]
         if Cust.Name == "Custo" then
             local Cost = Cust.Text:split("(")[2]:split(" ")[1]
                 if Cost:match("K") then
                 local RoverCost = Cost:split("K")
-                local RebirthCost = tonumber(math.floor(RoverCost[1]) * 1000)
-                    if PlayerMoney >= RebirthCost then 
-                    print(RebirthCost)
-                    game:GetService("ReplicatedStorage").Game_Service.Remotes_Event.Rebirth:FireServer()
-                    elseif Cost:match("M") then
-                    local RoverCost1 = Cost:split("M")
-                    local RebirthCost1 = tonumber(math.floor(RoverCost1[1]) * 100000)
-                        if PlayerMoney >= RebirthCost1 then 
-                        game:GetService("ReplicatedStorage").Game_Service.Remotes_Event.Rebirth:FireServer()
-                        elseif Cost:match("B") then 
-                        local RoverCost2 = Cost:split("B")
-                        local RebirthCost2 = tonumber(match.floor(RoverCost2[1]) * 100000000)
-                            if PlayerMoney >= RebirthCost2 then 
-                            game:GetService("ReplicatedStorage").Game_Service.Remotes_Event.Rebirth:FireServer()
-                        end
+                RebirthCost = tonumber(RoverCost[1] * 1000)
+                return RebirthCost
+                else
+                    if Cost:match("M") then 
+                local RoverCost1 = Cost:split("M")[1]
+                RebirthCost = tonumber(RoverCost1 * 1000000)
+                return RebirthCost
+                else
+                    if Cost:match("B") then
+                    local RoverCost2 = Cost:split("B")[1]
+                    RebirthCost = tonumber(RoverCost2 * 1000000000)
+                    return RebirthCost
+                    else
+                        if Cost:match("T") then 
+                            local RoverCost3 = Cost:split("T")[1]
+                            RebirthCost = tonumber(RoverCost3 * 1000000000000)
+                            return RebirthCost
+                            else
+                                if Cost:match("Q") or Cost:match("q") then 
+                        local RoverCost4 = Cost:split("Q") or Cost:split("q")
+                        RebirthCost = tonumber(RoverCost4 * 1000000000000000)
+                        return RebirthCost
                     end
                 end
             end
         end
     end
 end
+end
+end)()
+function UpReb()
+    spawn(function()
+        while getgenv().Reb == true do 
+            wait()
+local PlayerMoney = game:GetService("Players").LocalPlayer.leaderstats.Coins.Value
+if PlayerMoney >= AutoReb then 
+    game:GetService("ReplicatedStorage").Game_Service.Remotes_Event.Rebirth:FireServer()
+    end
+    end
 end)
 end
+
 
 local Areas = game:GetService("Workspace")["Client_Services"].Areas.Foods:GetChildren()
 local EggFold = game:GetService("Players").LocalPlayer.PlayerGui["Egg_Frames"]:GetChildren()
@@ -210,6 +228,7 @@ b:Toggle("Auto Sell",function(sell)
     getgenv().Sell = sell
     if sell then 
     AutoSell()
+    
     end
 end)
 
@@ -237,7 +256,7 @@ end)
 b2:Toggle("Auto Rebirth",function(stat)
     getgenv().Reb = stat
     if stat then 
-    AutoReb()
+    UpReb()
     end
 end)
 b2:Slider("WalkSpeed",{
