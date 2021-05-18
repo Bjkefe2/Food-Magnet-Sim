@@ -163,7 +163,7 @@ function AutoReb()
                         game:GetService("ReplicatedStorage").Game_Service.Remotes_Event.Rebirth:FireServer()
                         elseif Cost:match("B") then 
                         local RoverCost2 = Cost:split("B")
-                        local RebirthCost2 = tonumber(match.floor(RebirthCost2[1]) * 100000000)
+                        local RebirthCost2 = tonumber(match.floor(RoverCost2[1]) * 100000000)
                             if PlayerMoney >= RebirthCost2 then 
                             game:GetService("ReplicatedStorage").Game_Service.Remotes_Event.Rebirth:FireServer()
                         end
